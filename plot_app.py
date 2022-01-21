@@ -1,15 +1,16 @@
 from get_data import get_data
 import pandas as pd
+import plotly.express as px
 import streamlit as st 
 import pandas as pd
 from CONFIG import *
 
-
+# filter vol minimum 100 milion binance 10 milion for ftx
 
 
 st.set_page_config(page_title = 'Assets with OI VOL Ratio and VOL Filter', layout = 'wide')
 limit = st.sidebar.text_input('Enter How Many Top Assets You Want to Get(please enter some interger value!!!)')
-button = st.sidebar.button('Click the button to get the Required Table')
+button = st.sidebar.button('Click the button to get the Required Plot')
 
 if button and limit != '':
 	limit = int(limit)
@@ -23,7 +24,7 @@ if button and limit != '':
 			oi_vol_ratio_dict[key] = 0
 	for key in oi_vol_ratio_dict.keys():
 		try:
-			ratio = oi_dict[key]/vol_dict[key][0]
+			ratio = oi_dict[key]/vol_dict[key][1]
 			oi_vol_ratio_dict[key] = ratio
 		except ZeroDivisionError as e:
 			oi_vol_ratio_dict.pop(key)
@@ -43,8 +44,14 @@ if button and limit != '':
 		vol_sym_list.append(sym)
 	for val in vol_df['Value']:
 		vol_list.append(val[0])
-
-	final_df = pd.DataFrame({'OI/VOL Rank': oi_vol_sym_list[:limit], 'Vol Rank': vol_sym_list[:limit]})
-	st.dataframe(final_df)
+	final_limit = min(limit, len(oi_vol_list), len(vol_list))
+	rank_list = [i+1 for i in range(final_limit)]
+	final_df = pd.DataFrame({'Rank': rank_list, 'OI/VOL Symbol': oi_vol_sym_list[:final_limit], 'OI/VOL Ratio':oi_vol_list[:final_limit], 'Vol Symbol': vol_sym_list[:final_limit], 'Volume': vol_list[:final_limit]})
+	fig = px.scatter(final_df, x = 'OI/VOL Ratio', y = 'Vol Symbol', size = 'OI/VOL Ratio', color = 'OI/VOL Symbol', hover_data = ['Rank', 'Volume'], size_max = 90)
+	fig.update_yaxes(title_text = 'Retail Fomo')
+	fig.update_xaxes(title_text = 'Whale accumulation')
+	fig.update_layout(title = 'OI VOL RATIO with VOL RANK', width = 1200, height = 600, template='plotly_dark')
+	st.plotly_chart(fig)
+	st.download_button('Click Here to Download the Plot', fig.to_html(), 'OI VOL RATIO with VOL RANK' + '.html')
 else:
 	st.write('Click on the Button on the Sidebar to Get Your Required Plot')

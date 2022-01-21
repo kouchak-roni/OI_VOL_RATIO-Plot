@@ -47,7 +47,7 @@ class get_data:
 			time.sleep(0.01)
 			price = requests.get(url)
 			price = json.loads(price.content)
-			if type(price) == list:
+			if type(price) == list and float(price[0][5])*float(price[0][4]) >= 100000000:
 				volume_dic[symbol].append(float(price[0][5]))
 				volume_dic[symbol].append(float(price[0][5])*float(price[0][4]))
 			else:
