@@ -6,6 +6,7 @@ import pandas as pd
 from CONFIG import *
 
 # filter vol minimum 100 milion binance 10 milion for ftx
+# scatter_mapbox, scatter_3d
 
 
 st.set_page_config(page_title = 'Assets with OI VOL Ratio and VOL Filter', layout = 'wide')
@@ -47,10 +48,10 @@ if button and limit != '':
 	final_limit = min(limit, len(oi_vol_list), len(vol_list))
 	rank_list = [i+1 for i in range(final_limit)]
 	final_df = pd.DataFrame({'Rank': rank_list, 'OI/VOL Symbol': oi_vol_sym_list[:final_limit], 'OI/VOL Ratio':oi_vol_list[:final_limit], 'Vol Symbol': vol_sym_list[:final_limit], 'Volume': vol_list[:final_limit]})
-	fig = px.scatter(final_df, x = 'OI/VOL Ratio', y = 'Vol Symbol', size = 'OI/VOL Ratio', color = 'OI/VOL Symbol', hover_data = ['Rank', 'Volume'], size_max = 90)
-	fig.update_yaxes(title_text = 'Retail Fomo')
-	fig.update_xaxes(title_text = 'Whale accumulation')
-	fig.update_layout(title = 'OI VOL RATIO with VOL RANK', width = 1200, height = 600, template='plotly_dark')
+	fig = px.scatter_3d(final_df, x  = 'OI/VOL Ratio', y = 'Vol Symbol', z = 'Volume', color = 'Rank', size = 'OI/VOL Ratio', hover_data = ['OI/VOL Symbol', 'OI/VOL Ratio', 'Vol Symbol', 'Volume'], size_max = 90)
+	fig.update_layout(title = 'OI VOL RATIO with VOL RANK', scene = dict(
+                    xaxis_title = 'Whale accumulation',
+                    yaxis_title = 'Retail Fomo'), width = 1200, height = 600, template='plotly_dark')
 	st.plotly_chart(fig)
 	st.download_button('Click Here to Download the Plot', fig.to_html(), 'OI VOL RATIO with VOL RANK' + '.html')
 else:
